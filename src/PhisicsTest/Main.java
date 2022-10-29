@@ -50,20 +50,18 @@ public class Main extends JFrame{
                 switch (e.getKeyCode()){
                     case KeyEvent.VK_UP -> {
                         uIsDown = true;
-                        if(!ball.forceExist(up)) {
-                            up = new Force(new Vector2(0, 1), ball.mass * ball.g, "up");
+                            up = new Force(new Vector2(0, 1), ball.mass *1.15f* ball.g, "up");
                             ball.addForce(up);
-                        }
                     }
                     case KeyEvent.VK_RIGHT -> {
                         rIsDown = true;
-                            forward = new Force(new Vector2(1, 0), ball.mass * ball.g, "forward");
+                            forward = new Force(new Vector2(1, 0), ball.mass, "forward");
                             ball.addForce(forward);
                     }
                     case KeyEvent.VK_LEFT -> {
                         lIsDown = true;
-                        backward = new Force(new Vector2(-1, 0), ball.mass * ball.g, "backward");
-                        ball.addForce(backward);
+                            backward = new Force(new Vector2(-1, 0), ball.mass, "backward");
+                            ball.addForce(backward);
                     }
                 }
             }

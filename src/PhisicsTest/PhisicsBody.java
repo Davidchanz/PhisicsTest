@@ -17,9 +17,9 @@ public class PhisicsBody extends ShapeObject {
     public final float R = 6371000f;
     public final float M = 5.972E24f;
     public final float g = 10.0f;
-    public final float m = 0.015f;
-    public final float m_air = 0.001f;
-    public final float k = 0.15f;
+    public final float m = 0.005f;
+    public final float m_air = 0.0008f;
+    public final float k = 0.105f;
     public final float l = 260f;
     public float mass;
     private float s_velocity = 0.0f;
@@ -33,15 +33,14 @@ public class PhisicsBody extends ShapeObject {
     private Force Ff;
     private Force Fo;
     private Force Fu;
-    private Force Rf;
     private Vector2 oldDir = new Vector2(0,0);
     private float time;
     private boolean afterFn = false;
+    public boolean onFlat;
     PhisicsBody(String name, float mass){
         super(name, 2);
         this.mass = mass;
-        this.time = 1f;
-        Rf = new Force();
+        this.time = 0.4f;
         Ft = new Force(new Vector2(0, -1), mass * g, "Ft");
         Fn = new Force(new Vector2(0, 1), mass * g, "Fn");
         Ff = new Force(new Vector2(-1, 0), mass * g * m,"Ff");
@@ -50,25 +49,23 @@ public class PhisicsBody extends ShapeObject {
         constForces.add(Ft);
     }
     public void tick(){
-        Rf = new Force();
+        Force Rf = new Force();
         ArrayList<Force> allForces = new ArrayList<>();
-        boolean onFlat = false;
-        /*if(afterFn) {
-            varForces.add(Fu);
-            afterFn = false;
-        }*/
+        onFlat = false;
         if(position.y == 10) {
             allForces.add(Fn);
             onFlat = true;
-            //afterFn = true;
-            if(!varForces.contains(Fu))varForces.add(Fu);
+            afterFn = true;
+            //if(!varForces.contains(Fu))varForces.add(Fu);
         }
         for(var force: varForces.toArray(new Force[0])){
             force.scalar -= Fo.scalar;
             if(onFlat)
                 force.scalar -= Ff.scalar;
-            if(force.scalar <= 0.0)
+            if(force.scalar <= 0.0) {
                 varForces.remove(force);
+                //System.out.println("rem");
+            }
         }
         allForces.addAll(varForces);
         allForces.addAll(constForces);
@@ -77,35 +74,47 @@ public class PhisicsBody extends ShapeObject {
             Rf.scalar = Rf.sumScl(tmp);
             Rf.add(tmp.nor().mul(tmp.scalar));
         }
-        System.out.println(Rf.scalar);
+        if(Rf.scalar <= 0.1f) {
+            time = 0.4f;
+            return;
+        }
         //System.out.println(Rf.scalar);
-
 
         v_acceleration = new Vector2(Rf);
         v_velocity = new Vector2(Rf);
         s_acceleration = Rf.scalar/mass;
-        s_velocity = s_acceleration * time * time / 2;
+        s_velocity = s_acceleration * time;
 
-        Vector2 dir = v_velocity.nor().mul(s_velocity);
+        v_velocity.nor();
+        //Vector2 dir = v_velocity.mul(s_velocity);
+        Vector2 dir = new Vector2(Rf.mul(0.2f));
 
-        if(Rf.x > 0 && oldDir.x < 0 || Rf.y > 0 && oldDir.y < 0 || Rf.x < 0 && oldDir.x > 0 || Rf.y < 0 && oldDir.y > 0 || position.y == 0.0f) {
-            //time = 0;
+        if(Rf.x > 0 && oldDir.x < 0 || Rf.y > 0 && oldDir.y < 0 || Rf.x < 0 && oldDir.x > 0 || Rf.y < 0 && oldDir.y > 0) {
+            //time = 0.4f;
             //System.out.println("null");
         }
         if(position.y + dir.y < 10){
-            time = 1;
+            for(var force: varForces.toArray(new Force[0])) {
+                force.scalar *= 0.5;
+                if(force.scalar <= 0.0) {
+                    varForces.remove(force);
+                    //System.out.println("rem");
+                }
+            }
+            time = 0.4f;
 
-            Fu = new Force(new Vector2(0, 1), (mass * g * k * s_velocity), "Fu");
+            Fu = new Force(new Vector2(0, 1), (k * s_acceleration * g), "Fu");
 
             Fn = new Force(new Vector2(0, 1), mass * g, "Fn");
 
             dir = new Vector2(0, 10).sub(0, position.y);
         }
         this.move(dir);
-        time += 0.001;
+        time += 0.01;
+        //System.out.println(s_velocity);
     }
     public void addForce(Force force){
-        time = 1f;
+        //time = 1f;
         this.varForces.add(force);
     }
     public void remForce(Force force){
