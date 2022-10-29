@@ -26,7 +26,7 @@ public class PhisicsBody extends ShapeObject {
     private Vector2 v_velocity = new Vector2(0,0);
     private float s_acceleration = 0.0f;
     private Vector2 v_acceleration = new Vector2(0,0);
-    private ArrayList<Force> varForces = new ArrayList<>();
+    private Force varForce = new Force();
     private ArrayList<Force> constForces = new ArrayList<>();
     private final Force Ft;
     private Force Fn;
@@ -40,7 +40,7 @@ public class PhisicsBody extends ShapeObject {
     PhisicsBody(String name, float mass){
         super(name, 2);
         this.mass = mass;
-        this.time = 0.4f;
+        this.time = 0.8f;
         Ft = new Force(new Vector2(0, -1), mass * g, "Ft");
         Fn = new Force(new Vector2(0, 1), mass * g, "Fn");
         Ff = new Force(new Vector2(-1, 0), mass * g * m,"Ff");
@@ -55,19 +55,26 @@ public class PhisicsBody extends ShapeObject {
         if(position.y == 10) {
             allForces.add(Fn);
             onFlat = true;
-            afterFn = true;
-            //if(!varForces.contains(Fu))varForces.add(Fu);
         }
-        for(var force: varForces.toArray(new Force[0])){
-            force.scalar -= Fo.scalar;
-            if(onFlat)
-                force.scalar -= Ff.scalar;
-            if(force.scalar <= 0.0) {
-                varForces.remove(force);
+
+        varForce.scalar -= Fo.scalar;
+        if(onFlat) {
+            varForce.scalar -= Ff.scalar;
+        }
+        if(varForce.scalar <= 0.0) {
+            varForce = new Force();
+            //System.out.println("rem");
+        }
+
+        /*if(constForces.contains(Fu)){
+            Fu.scalar -= Fo.scalar;
+            if(Fu.scalar <= 0.0) {
+                varForces.remove(Fu);
                 //System.out.println("rem");
             }
-        }
-        allForces.addAll(varForces);
+        }*/
+
+        allForces.add(varForce);
         allForces.addAll(constForces);
         for(var force: allForces.toArray(new Force[0])){
             var tmp = new Force(force);
@@ -75,7 +82,7 @@ public class PhisicsBody extends ShapeObject {
             Rf.add(tmp.nor().mul(tmp.scalar));
         }
         if(Rf.scalar <= 0.1f) {
-            time = 0.4f;
+            time = 0.8f;
             return;
         }
         //System.out.println(Rf.scalar);
@@ -86,24 +93,20 @@ public class PhisicsBody extends ShapeObject {
         s_velocity = s_acceleration * time;
 
         v_velocity.nor();
-        //Vector2 dir = v_velocity.mul(s_velocity);
-        Vector2 dir = new Vector2(Rf.mul(0.2f));
+        Vector2 dir = v_velocity.mul(s_velocity);
+        //Vector2 dir = new Vector2(Rf.mul(0.2f));
 
         if(Rf.x > 0 && oldDir.x < 0 || Rf.y > 0 && oldDir.y < 0 || Rf.x < 0 && oldDir.x > 0 || Rf.y < 0 && oldDir.y > 0) {
             //time = 0.4f;
             //System.out.println("null");
         }
         if(position.y + dir.y < 10){
-            for(var force: varForces.toArray(new Force[0])) {
-                force.scalar *= 0.5;
-                if(force.scalar <= 0.0) {
-                    varForces.remove(force);
-                    //System.out.println("rem");
-                }
-            }
-            time = 0.4f;
+            varForce.scalar *= 0.5;
 
-            Fu = new Force(new Vector2(0, 1), (k * s_acceleration * g), "Fu");
+            time = 0.8f;
+
+            Fu = new Force(new Vector2(0, 1), (k * s_velocity * g), "Fu");
+            //addForce(Fu);
 
             Fn = new Force(new Vector2(0, 1), mass * g, "Fn");
 
@@ -114,17 +117,9 @@ public class PhisicsBody extends ShapeObject {
         //System.out.println(s_velocity);
     }
     public void addForce(Force force){
-        //time = 1f;
-        this.varForces.add(force);
-    }
-    public void remForce(Force force){
-        this.varForces.remove(force);
-    }
-    public boolean forceExist(Force force){
-        for(var f: varForces.toArray(new Force[0])){
-            if(f.name.equals(force.name))
-                return true;
-        }
-        return false;
+        var tmp = new Force(force);
+        varForce.scalar = varForce.sumScl(tmp);
+        varForce.add(tmp.nor().mul(tmp.scalar));
+
     }
 }

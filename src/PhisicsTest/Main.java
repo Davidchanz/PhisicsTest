@@ -101,7 +101,7 @@ public class Main extends JFrame{
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        Force go = new Force(new Vector2(0.5f, 3), 120, "go");
+        Force go = new Force(new Vector2(0.2f, 2), 110, "go");
         ball.addForce(go);
         for(;;) {
             end_time = System.currentTimeMillis();
