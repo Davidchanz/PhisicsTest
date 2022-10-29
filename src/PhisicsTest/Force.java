@@ -2,7 +2,7 @@ package PhisicsTest;
 
 import UnityMath.Vector2;
 
-import java.util.Comparator;
+
 
 public class Force extends Vector2{
     public String name;
