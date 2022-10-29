@@ -19,25 +19,24 @@ public class PhisicsBody extends ShapeObject {
     public final float g = 10.0f;
     public final float m = 0.015f;
     public final float m_air = 0.001f;
-    public final float k = 0.05f;
+    public final float k = 0.15f;
     public final float l = 260f;
     public float mass;
     private float s_velocity = 0.0f;
     private Vector2 v_velocity = new Vector2(0,0);
     private float s_acceleration = 0.0f;
     private Vector2 v_acceleration = new Vector2(0,0);
-    private float s_impulse = 0.0f;
-    private Vector2 v_impulse = new Vector2(0,0);
     private ArrayList<Force> varForces = new ArrayList<>();
     private ArrayList<Force> constForces = new ArrayList<>();
-    public final Force Ft;
-    public Force Fn;
-    public Force Ff;
-    public Force Fo;
-    public Force Fu;
+    private final Force Ft;
+    private Force Fn;
+    private Force Ff;
+    private Force Fo;
+    private Force Fu;
     private Force Rf;
     private Vector2 oldDir = new Vector2(0,0);
-    public float time;
+    private float time;
+    private boolean afterFn = false;
     PhisicsBody(String name, float mass){
         super(name, 2);
         this.mass = mass;
@@ -54,9 +53,15 @@ public class PhisicsBody extends ShapeObject {
         Rf = new Force();
         ArrayList<Force> allForces = new ArrayList<>();
         boolean onFlat = false;
+        /*if(afterFn) {
+            varForces.add(Fu);
+            afterFn = false;
+        }*/
         if(position.y == 10) {
             allForces.add(Fn);
             onFlat = true;
+            //afterFn = true;
+            if(!varForces.contains(Fu))varForces.add(Fu);
         }
         for(var force: varForces.toArray(new Force[0])){
             force.scalar -= Fo.scalar;
@@ -72,8 +77,8 @@ public class PhisicsBody extends ShapeObject {
             Rf.scalar = Rf.sumScl(tmp);
             Rf.add(tmp.nor().mul(tmp.scalar));
         }
-        System.out.println(Rf);
         System.out.println(Rf.scalar);
+        //System.out.println(Rf.scalar);
 
 
         v_acceleration = new Vector2(Rf);
@@ -88,13 +93,12 @@ public class PhisicsBody extends ShapeObject {
             //System.out.println("null");
         }
         if(position.y + dir.y < 10){
-            for(var force: varForces.toArray(new Force[0])) {
-                /*force.mul(0.5f);
-                force.scalar *= 0.5f;*/
-            }
-            //time = 0;
+            time = 1;
+
+            Fu = new Force(new Vector2(0, 1), (mass * g * k * s_velocity), "Fu");
+
             Fn = new Force(new Vector2(0, 1), mass * g, "Fn");
-            //varForces.add(Fn);
+
             dir = new Vector2(0, 10).sub(0, position.y);
         }
         this.move(dir);
