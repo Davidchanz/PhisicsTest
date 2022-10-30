@@ -40,7 +40,7 @@ public class PhisicsBody extends ShapeObject {
     PhisicsBody(String name, float mass){
         super(name, 2);
         this.mass = mass;
-        this.time = 0.8f;
+        this.time = 0.1f;
         Ft = new Force(new Vector2(0, -1), mass * g, "Ft");
         Fn = new Force(new Vector2(0, 1), mass * g, "Fn");
         Ff = new Force(new Vector2(-1, 0), mass * g * m,"Ff");
@@ -55,15 +55,28 @@ public class PhisicsBody extends ShapeObject {
         if(position.y == 10) {
             allForces.add(Fn);
             onFlat = true;
+            addForce(Fu);
         }
 
-        varForce.scalar -= Fo.scalar;
+        Fo.x = varForce.x;
+        Fo.y = varForce.y;
+        Fo.mul(-1.0f).nor();
+        var tmp = new Force(Fo);
+        varForce.scalar = varForce.sumScl(tmp);
+        varForce.add(tmp.nor().mul(tmp.scalar));
+        //varForce.scalar -= Fo.scalar;
         if(onFlat) {
-            varForce.scalar -= Ff.scalar;
+            Ff.x = varForce.x;
+            Ff.y = varForce.y;
+            Ff.mul(-1.0f).nor();
+            var temp = new Force(Ff);
+            varForce.scalar = varForce.sumScl(temp);
+            varForce.add(temp.nor().mul(temp.scalar));
+            //varForce.scalar -= Ff.scalar;
         }
         if(varForce.scalar <= 0.0) {
             varForce = new Force();
-            //System.out.println("rem");
+            System.out.println("rem");
         }
 
         /*if(constForces.contains(Fu)){
@@ -77,13 +90,13 @@ public class PhisicsBody extends ShapeObject {
         allForces.add(varForce);
         allForces.addAll(constForces);
         for(var force: allForces.toArray(new Force[0])){
-            var tmp = new Force(force);
-            Rf.scalar = Rf.sumScl(tmp);
-            Rf.add(tmp.nor().mul(tmp.scalar));
+            var temp = new Force(force);
+            Rf.scalar = Rf.sumScl(temp);
+            Rf.add(temp.nor().mul(temp.scalar));
         }
         if(Rf.scalar <= 0.1f) {
-            time = 0.8f;
-            return;
+            //time = 0.8f;
+            //return;
         }
         //System.out.println(Rf.scalar);
 
@@ -101,20 +114,20 @@ public class PhisicsBody extends ShapeObject {
             //System.out.println("null");
         }
         if(position.y + dir.y < 10){
-            varForce.scalar *= 0.5;
+            //varForce.scalar *= -1;
 
             time = 0.8f;
 
-            Fu = new Force(new Vector2(0, 1), (k * s_velocity * g), "Fu");
-            //addForce(Fu);
+            Fu = new Force(new Vector2(0, 1), (k * Rf.scalar * g), "Fu");
 
             Fn = new Force(new Vector2(0, 1), mass * g, "Fn");
+            //addForce(Fn);
 
             dir = new Vector2(0, 10).sub(0, position.y);
         }
         this.move(dir);
         time += 0.01;
-        //System.out.println(s_velocity);
+        //System.out.println(Fu.scalar);
     }
     public void addForce(Force force){
         var tmp = new Force(force);

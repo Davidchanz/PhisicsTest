@@ -45,18 +45,22 @@ public class Main extends JFrame{
 
         this.addKeyListener(new KeyAdapter() {
 
-            public synchronized void keyPressed(KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
                 super.keyTyped(e);
                 switch (e.getKeyCode()){
                     case KeyEvent.VK_UP -> {
-                        uIsDown = true;
-                            up = new Force(new Vector2(0, 1), ball.mass *1.15f* ball.g, "up");
+                        if(ball.position.y >= 10 && ball.position.y <= 18 && !uIsDown) {
+                            uIsDown = true;
+                            up = new Force(new Vector2(0, 1), ball.mass, "up");
                             ball.addForce(up);
+                        }
                     }
                     case KeyEvent.VK_RIGHT -> {
-                        rIsDown = true;
+                        if(!rIsDown) {
+                            rIsDown = true;
                             forward = new Force(new Vector2(1, 0), ball.mass, "forward");
                             ball.addForce(forward);
+                        }
                     }
                     case KeyEvent.VK_LEFT -> {
                         lIsDown = true;
@@ -64,6 +68,8 @@ public class Main extends JFrame{
                             ball.addForce(backward);
                     }
                 }
+                uIsDown = false;
+                rIsDown = false;
             }
 
             @Override
@@ -102,7 +108,7 @@ public class Main extends JFrame{
             throw new RuntimeException(e);
         }
         Force go = new Force(new Vector2(0.2f, 2), 110, "go");
-        ball.addForce(go);
+        //ball.addForce(go);
         for(;;) {
             end_time = System.currentTimeMillis();
             summ_time += end_time - start_time;

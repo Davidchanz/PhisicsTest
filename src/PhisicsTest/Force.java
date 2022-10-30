@@ -37,6 +37,12 @@ public class Force extends Vector2{
 
         var tmp = new Force(force);
         float angel = 180 - this.angleDeg(tmp);
-        return  (float)Math.sqrt(this.scalar*this.scalar + force.scalar*force.scalar - 2*this.scalar*force.scalar*Math.cos(Math.toRadians(angel)));
+        double temp = this.scalar * this.scalar + force.scalar * force.scalar - 2 * this.scalar * force.scalar * Math.cos(Math.toRadians(angel));
+        double result = Math.sqrt(temp);
+        if(Double.isNaN(result)) {
+            System.out.println("Errror");
+            return 0.0f;
+        }
+        return  (float)result;
     }
 }
