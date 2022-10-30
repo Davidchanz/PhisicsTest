@@ -22,6 +22,8 @@ public class PhisicsBody extends ShapeObject {
     private float time;
     public boolean onFlat;
     public float Whm = 0.0f;
+    public float Whm_old = 0.0f;
+    public float dl;
     PhisicsBody(String name, float mass){
         super(name, 2);
         this.mass = mass;
@@ -37,7 +39,7 @@ public class PhisicsBody extends ShapeObject {
     }
     public void tick(){
         //System.out.println(mass * g * position.y);
-        //Whm = Math.max(Whm, mass * g * position.y);
+        Whm = Math.max(Whm, position.y);
 
         Force Rf = new Force();
         ArrayList<Force> allForces = new ArrayList<>();
@@ -45,25 +47,26 @@ public class PhisicsBody extends ShapeObject {
         if(position.y == 10) {
             allForces.add(Fn);
             onFlat = true;
-            addForce(Fu);
         }
 
-        Fo.set(varForce);
-        Fo.mul(-1.0f).nor();
-        var tmp = new Force(Fo);
-        varForce.sumScl(tmp);
-        varForce.add(tmp.nor().mul(tmp.scalar));
-        if(onFlat) {
-            Ff.set(varForce);
-            //Ff.y = 0;
-            Ff.mul(-1.0f).nor();
-            var temp = new Force(Ff);
-            varForce.sumScl(temp);
-            varForce.add(temp.nor().mul(temp.scalar));
-        }
-        if(varForce.scalar <= 0.0) {
-            varForce = new Force();
-            //System.out.println("rem");
+        if(varForce.scalar >= 5.0f) {
+            Fo.set(varForce);
+            Fo.mul(-1.0f).nor();
+            var tmp = new Force(Fo);
+            varForce.sumScl(tmp);
+            varForce.add(tmp.nor().mul(tmp.scalar));
+            if (onFlat) {
+                Ff.set(varForce);
+                //Ff.y = 0;
+                Ff.mul(-1.0f).nor();
+                var temp = new Force(Ff);
+                varForce.sumScl(temp);
+                varForce.add(temp.nor().mul(temp.scalar));
+            }
+            if (varForce.scalar <= 1.0) {
+                varForce = new Force();
+                System.out.println("rem");
+            }
         }
 
         allForces.add(varForce);
@@ -73,6 +76,17 @@ public class PhisicsBody extends ShapeObject {
             Rf.sumScl(temp);
             Rf.add(temp.nor().mul(temp.scalar));
         }
+        //if(Rf.scalar <= 0.0f)
+            //return;
+
+        /*for(var force: allForces.toArray(new Force[0])){
+            var temp = new Force(force);
+            Rf.sumScl(temp);
+            Rf.add(temp.nor().mul(temp.scalar));
+        }*/
+        /*if(Rf.scalar <= 0.0f){
+            return;
+        }*/
 
         Vector2 v_acceleration = new Vector2(Rf);//TODO
         Vector2 v_velocity = new Vector2(Rf);
@@ -85,7 +99,10 @@ public class PhisicsBody extends ShapeObject {
         if(Rf.x > 0 && oldDir.x < 0 || Rf.y > 0 && oldDir.y < 0 || Rf.x < 0 && oldDir.x > 0 || Rf.y < 0 && oldDir.y > 0) {
             //System.out.println("null");
         }
-        if(position.y + dir.y < 10){
+        if(position.y + dir.y <= 10){
+            time = 1.0f;
+        }
+        if(position.y + dir.y <= 10 && !onFlat){
            /* if(Rf.y < 0.0f){
                 float angel = Rf.angleDeg(new Vector2(1,0));
                 Rf.rotateDeg(360 - angel);
@@ -99,14 +116,27 @@ public class PhisicsBody extends ShapeObject {
             float dF = dv - s_velocity;
             Rf.scalar -= dF;*/
             //varForce.scalar -= time;
+            //varForce.scalar *= 0.5f;
 
-            Fu = new Force(new Vector2(0, 1), (k * Rf.scalar + 12), "Fu");
+            if(dl != 0.0f) {
+                while(dl < Math.abs(Whm_old - Whm)) {
+                    Whm -= 10;
+                }
+            }
+            float dl = Math.abs(Whm_old - Whm);
+
+            Fu = new Force(new Vector2(0, 1), (k*(dl)), "Fu");
 
             Fn = new Force(new Vector2(0, 1), mass * g, "Fn");
 
             dir = new Vector2(0, 10).sub(0, position.y);
 
-            time = 1f;
+            if(Fu.scalar >= 10.0f) {
+                addForce(Fu);
+            }
+
+            Whm_old = Whm;
+            Whm = 0;
         }
         this.move(dir);
         time += 0.1;

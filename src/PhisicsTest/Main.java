@@ -51,18 +51,18 @@ public class Main extends JFrame{
                     case KeyEvent.VK_UP -> {
                         if(ball.position.y >= 10 && ball.position.y <= 12) {
                             uIsDown = true;
-                            up = new Force(new Vector2(0, 1), ball.mass, "up");
+                            up = new Force(new Vector2(0, 1), ball.mass+1, "up");
                             ball.addForce(up);
                         }
                     }
                     case KeyEvent.VK_RIGHT -> {
                         rIsDown = true;
-                        forward = new Force(new Vector2(1, 0), ball.mass, "forward");
+                        forward = new Force(new Vector2(1, 0), ball.mass+1, "forward");
                         ball.addForce(forward);
                     }
                     case KeyEvent.VK_LEFT -> {
                         lIsDown = true;
-                        backward = new Force(new Vector2(-1, 0), ball.mass, "backward");
+                        backward = new Force(new Vector2(-1, 0), ball.mass+1, "backward");
                         ball.addForce(backward);
                     }
                 }
