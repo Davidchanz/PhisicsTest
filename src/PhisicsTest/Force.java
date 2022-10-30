@@ -27,7 +27,7 @@ public class Force extends Vector2{
         this.scalar = 0.0f;
         this.name = "force";
     }
-    public float sumScl(Force force){
+    public Force sumScl(Force force) {
         /*this.x = 0;
         this.y = 1;
         this.scalar = 1;
@@ -39,10 +39,10 @@ public class Force extends Vector2{
         float angel = 180 - this.angleDeg(tmp);
         double temp = this.scalar * this.scalar + force.scalar * force.scalar - 2 * this.scalar * force.scalar * Math.cos(Math.toRadians(angel));
         double result = Math.sqrt(temp);
-        if(Double.isNaN(result)) {
-            System.out.println("Errror");
-            return 0.0f;
-        }
-        return  (float)result;
+        if (Double.isNaN(result))
+            this.scalar = 0.0f;
+        else
+            this.scalar = (float) result;
+        return this;
     }
 }

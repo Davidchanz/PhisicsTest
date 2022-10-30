@@ -39,9 +39,9 @@ public class Main extends JFrame{
         floor.add(new Rectangle(0,300, new Vector2(0,0), Color.DARK_GRAY));
         scene.add(floor);
 
-        up = new Force(new Vector2(0, 1), ball.mass * ball.g, "up");
-        forward = new Force(new Vector2(1, 0), ball.mass * ball.g, "forward");
-        backward = new Force(new Vector2(-1, 0), ball.mass * ball.g, "backward");
+        up = new Force(new Vector2(0, 1), 0, "up");
+        forward = new Force(new Vector2(1, 0), 0, "forward");
+        backward = new Force(new Vector2(-1, 0), 0, "backward");
 
         this.addKeyListener(new KeyAdapter() {
 
@@ -49,41 +49,21 @@ public class Main extends JFrame{
                 super.keyTyped(e);
                 switch (e.getKeyCode()){
                     case KeyEvent.VK_UP -> {
-                        if(ball.position.y >= 10 && ball.position.y <= 18 && !uIsDown) {
+                        if(ball.position.y >= 10 && ball.position.y <= 12) {
                             uIsDown = true;
                             up = new Force(new Vector2(0, 1), ball.mass, "up");
                             ball.addForce(up);
                         }
                     }
                     case KeyEvent.VK_RIGHT -> {
-                        if(!rIsDown) {
-                            rIsDown = true;
-                            forward = new Force(new Vector2(1, 0), ball.mass, "forward");
-                            ball.addForce(forward);
-                        }
+                        rIsDown = true;
+                        forward = new Force(new Vector2(1, 0), ball.mass, "forward");
+                        ball.addForce(forward);
                     }
                     case KeyEvent.VK_LEFT -> {
                         lIsDown = true;
-                            backward = new Force(new Vector2(-1, 0), ball.mass, "backward");
-                            ball.addForce(backward);
-                    }
-                }
-                uIsDown = false;
-                rIsDown = false;
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
-                switch (e.getKeyCode()){
-                    case KeyEvent.VK_UP -> {
-                        uIsDown = false;
-                    }
-                    case KeyEvent.VK_RIGHT -> {
-                        rIsDown = false;
-                    }
-                    case KeyEvent.VK_LEFT -> {
-                        lIsDown = false;
+                        backward = new Force(new Vector2(-1, 0), ball.mass, "backward");
+                        ball.addForce(backward);
                     }
                 }
             }
@@ -107,12 +87,12 @@ public class Main extends JFrame{
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        Force go = new Force(new Vector2(0.2f, 2), 110, "go");
+        Force go = new Force(new Vector2(0.2f, 1), 110, "go");
         //ball.addForce(go);
         for(;;) {
             end_time = System.currentTimeMillis();
             summ_time += end_time - start_time;
-            int delay = 10;
+            int delay = 20;
             if (summ_time >= delay) {
                 tk.sync();
                 ball.tick();
